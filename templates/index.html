@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090d18"><title>RoadSight AI | Pothole Detection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
+<body><div class="glow g1"></div><div class="glow g2"></div>
+<nav class="nav wrap"><a class="brand" href="/"><span class="logo">R</span><span>ROAD<span class="aqua">SIGHT</span><small>INTELLIGENCE PLATFORM</small></span></a><div class="navmeta"><i></i> LOCAL AI ENGINE <b>YOLO26s</b></div></nav>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">COMPUTER VISION&nbsp; / &nbsp;ROAD SAFETY</div><h1>See the road.<br><em>Spot the risk.</em></h1><p>Upload a road image and let your trained YOLO26s model identify potholes, annotate detections and summarize the results.</p></section>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="alert">{{ message }}</div>{% endfor %}{% endwith %}
+{% if not model_ready %}<div class="warning"><strong>Model checkpoint not loaded</strong><p>{{ model_error or "Place your trained checkpoint beside app.py as best.pt, then restart Flask." }}</p></div>{% endif %}
+<section><div class="heading"><div><small>01 / INPUT</small><h2>Upload road image</h2></div><span>IMAGE ANALYSIS</span></div>
+<form class="panel" action="{{ url_for('detect') }}" method="post" enctype="multipart/form-data" id="form">
+<input id="imageInput" name="image" type="file" accept=".jpg,.jpeg,.png,.webp,image/*" hidden required>
+<label class="dropzone" for="imageInput" id="dropzone"><span class="upload-icon">↑</span><strong id="fileTitle">Drop your road image here</strong><span>or <b>browse files</b> from your device</span><small>JPG · PNG · WEBP &nbsp;•&nbsp; MAX 12 MB</small></label>
+<div class="preview" id="preview" hidden><img id="previewImg" alt="Selected image"><div><strong id="previewName"></strong><small>Ready for analysis</small></div><button type="button" id="remove">Remove</button></div>
+<div class="formfoot"><span>✓ &nbsp;Confidence threshold <b>49.9%</b></span><button class="primary" type="submit" {% if not model_ready %}disabled{% endif %}>Run detection <b>↗</b></button></div></form></section>
+{% if result_image %}<section class="results" id="results"><div class="heading"><div><small>02 / ANALYSIS</small><h2>Detection results</h2></div><span class="complete">● ANALYSIS COMPLETE</span></div>
+<div class="stats"><article><small>POTHOLES DETECTED</small><strong>{{ pothole_count }}</strong><span>Objects identified</span></article><article><small>PROCESSING TIME</small><strong>{{ processing_ms }}<i> ms</i></strong><span>Model inference</span></article><article><small>MEAN CONFIDENCE</small><strong>{{ mean_confidence }}<i>%</i></strong><span>Across detected boxes</span></article></div>
+<div class="panel output"><div class="outputhead"><div><small>ANNOTATED OUTPUT</small><h3>{{ original_name }}</h3></div><a class="download" href="{{ download_url }}">↓ Download image</a></div><div class="resultimg"><img src="{{ result_image }}" alt="Pothole detection output"></div>
+{% if detections %}<div class="breakdown"><div class="listhead">DETECTION BREAKDOWN <span>{{ detections|length }} BOXES</span></div>{% for d in detections %}<div class="detectrow"><i></i><span>{{ d.name|title }}</span><div class="track"><b style="width:{{ d.confidence }}%"></b></div><strong>{{ d.confidence }}%</strong></div>{% endfor %}</div>{% else %}<p class="none">No potholes detected above the confidence threshold.</p>{% endif %}</div></section>{% endif %}
+<div class="features"><div><b>◎</b><span><strong>Trained model</strong><small>Your custom YOLO26s checkpoint</small></span></div><div><b>⌁</b><span><strong>640 px inference</strong><small>Configured image resolution</small></span></div><div><b>◈</b><span><strong>Local processing</strong><small>Images processed on this machine</small></span></div></div>
+<footer><strong>ROAD<span class="aqua">SIGHT</span> AI</strong><span>BUILT FOR SAFER ROADS · YOLO26s</span></footer></main>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script></body></html>
